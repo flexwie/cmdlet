@@ -4,5 +4,6 @@ export interface ICommand {
 
 export interface InternalCommand extends ICommand {
   params?: any;
+  args?: string;
   new (...args: any): any;
 }

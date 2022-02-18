@@ -1,7 +1,7 @@
 export const Param: any = (a: any, b: any) => {
-  let definitions: any = (a.constructor.params = []);
+  let parameters: any = (a.constructor.params = []);
 
-  definitions[b] = {
+  parameters[b] = {
     name: b,
     required: true,
   };
