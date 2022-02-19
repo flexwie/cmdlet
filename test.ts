@@ -1,4 +1,4 @@
-import { Service, Command, ICommand, Param, execute, Argument } from "./src";
+import { Service, Command, ICommand, Param, Argument, CLIBuilder } from "./src";
 
 @Service()
 class ServiceClass {
@@ -9,7 +9,7 @@ class ServiceClass {
 
 @Command("command and")
 class Base implements ICommand {
-  @Param text?: string;
+  @Param({ short: "t" }) text?: string;
   @Argument args?: string[];
 
   constructor(private service: ServiceClass) {}
@@ -21,9 +21,9 @@ class Base implements ICommand {
   }
 }
 
-@Command("command and")
+@Command()
 class Test implements ICommand {
-  @Param text?: string;
+  @Param({}) text?: string;
 
   constructor(private service: ServiceClass) {}
 
@@ -34,4 +34,7 @@ class Test implements ICommand {
 }
 
 // test area
-execute();
+const cli = new CLIBuilder()
+  .setName("Toolkit")
+  .setDependencyResolver((target) => new target(new ServiceClass()))
+  .execute();
