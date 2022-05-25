@@ -7,31 +7,35 @@ class ServiceClass {
   }
 }
 
-@Command("command and")
+@Command()
 class Base implements ICommand {
-  @Param({ short: "t" }) text?: string;
+  @Param({ short: "t", description: "Test Flag" })
+  text?: boolean;
   @Argument args?: string[];
 
-  constructor(private service: ServiceClass) {}
+  description = "Example Command Description"
+
+  constructor(private service: ServiceClass) { }
 
   run() {
-    this.service.process();
-    console.log(this.text + "3");
-    console.log(this.args);
+    console.log(this.args)
+    this.service.process()
+    console.log(this.text);
   }
 }
 
-@Command()
-class Test implements ICommand {
-  @Param({}) text?: string;
+// @Command("Test")
+// class Test implements ICommand {
+//   @Param() text?: string;
 
-  constructor(private service: ServiceClass) {}
+//   constructor(private service: ServiceClass) { }
 
-  run() {
-    this.service.process();
-    console.log(this.text + "2");
-  }
-}
+//   run() {
+//     console.log("Test")
+//     this.service.process();
+//     console.log(this.text + "2");
+//   }
+// }
 
 // test area
 const cli = new CLIBuilder()

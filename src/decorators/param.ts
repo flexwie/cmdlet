@@ -13,6 +13,7 @@ export type ParamDefiniton = {
   name: string;
   required?: boolean;
   short?: string;
+  description?: string
   type: any;
 };
 
@@ -34,5 +35,6 @@ export const Param = (opts?: ParamOptions) => (target: any, fnName: string) => {
     required: true,
     short: opts?.short,
     type,
+    description: opts?.description
   };
 };

@@ -87,9 +87,22 @@ export class CLIBuilder {
 
         cmdFn[flag!.name] = this.parseArg(cmdFn, flag!.name, args[a]);
       } else {
-        throw new Error("unknown arg: " + a);
+        //throw new Error("unknown arg: " + a);
       }
     });
+
+    if (args.h || args.help) {
+      console.log("-- HELP ---");
+      cmdFn.description && console.log(cmdFn.description)
+
+      const constructorAlias: any = cmdFn.constructor
+
+      Object.keys(constructorAlias.params).forEach((k) => {
+        const v: ParamDefiniton = constructorAlias.params[k]
+        console.log(`  --${v.name}${v.short ? ", --" + v.short : ""} [${v.type.name}]${v.description ? " -> " + v.description : ""}`)
+      })
+      return
+    }
 
     // execute the function
     cmdFn.run();
