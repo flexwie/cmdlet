@@ -2,9 +2,9 @@ import { dad } from "stepdad";
 import { commandContainer } from "./decorators/container";
 import minimist from "minimist";
 import { Type } from "stepdad/dist/interfaces/Type";
-import { InternalCommand } from "./types";
+import { Constructor, Indexable, InternalCommand } from "./types";
 import { ParamDefiniton } from "./decorators/param";
-import { DEFAULT_COMMAND } from "./symbols";
+import { CONSTRUCTOR, DEFAULT_COMMAND } from "./symbols";
 
 type Resolver = <T>(target: Type<T>) => T;
 export class CLIBuilder {
@@ -55,11 +55,11 @@ export class CLIBuilder {
     }
 
     // inject the dependencies
-    let cmdFn: InternalCommand;
+    let cmdFn: InternalCommand & Indexable;
     if (this.dependencyResolver) {
       cmdFn = this.dependencyResolver<typeof fn>(fn);
     } else {
-      [cmdFn] = dad<InternalCommand>(fn);
+      [cmdFn] = dad<InternalCommand & Indexable>(fn);
     }
 
     // map the positional arguments
@@ -73,16 +73,19 @@ export class CLIBuilder {
       }
 
       if (fn.params![a]) {
-        (cmdFn as any)[a] = args[a];
+        // map full length param to command
+        cmdFn[a] = this.parseArg(cmdFn, a, args[a]);
       } else if (
         Object.values<ParamDefiniton>(fn.params!).findIndex(
           (v) => v.short == a
         ) > -1
       ) {
+        // search and map shorthand to command
         let flag = Object.values<ParamDefiniton>(fn.params!).find(
           (v) => v.short == a
         );
-        (cmdFn as any)[flag!.name] = args[a];
+
+        cmdFn[flag!.name] = this.parseArg(cmdFn, flag!.name, args[a]);
       } else {
         throw new Error("unknown arg: " + a);
       }
@@ -90,6 +93,15 @@ export class CLIBuilder {
 
     // execute the function
     cmdFn.run();
+  }
+
+  // cast to the correct type
+  private parseArg(target: Constructor, key: string, value: any): any {
+    const customFactory = Reflect.getMetadata(CONSTRUCTOR, target, key);
+    const designType = Reflect.getMetadata("design:type", target, key);
+    const factory = customFactory || designType;
+
+    return factory(value);
   }
 }
 
